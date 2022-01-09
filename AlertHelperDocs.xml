@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<doc>
+	<assembly>
+		<name>Alert</name>
+	</assembly>
+	<members>
+        <member name="T:IngameScript.Alert.Program">
+			<summary>A class that can activate / deactivate an alert system. Includes: Changes in doors, lights and sounds.</summary>
+		</member>
+
+		<member name="M:IngameScript.Alert.Program.Start()">
+			<summary>Starts the alert. Checks the <see cref="Switches"/> for clues as to what systems to activate.</summary>
+		</member>
+
+		<member name="M:IngameScript.Alert.Program.Stop()">
+			<summary>Stops the alert. Checks the <see cref="Switches"/> for clues as to what systems to return to normal.</summary>
+		</member>
+	</members>
+</doc>
