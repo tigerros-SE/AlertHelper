@@ -18,6 +18,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRageMath;
 using IngameScript.TiCommons.Extensions;
+using IngameScript.TiCommons.IGCTi;
 
 namespace IngameScript.Alert {
 	partial class Program {
@@ -31,8 +32,9 @@ namespace IngameScript.Alert {
 				var soundBlocks = GridTerminalSystem.GetBlocksOfType<IMySoundBlock>();
 
 				foreach (var soundBlock in soundBlocks) {
-					OriginalSoundBlockProperties.OriginalStrings["SelectedSound"] = soundBlock.SelectedSound;
-					OriginalSoundBlockProperties.OriginalFloats["LoopPeriod"] = soundBlock.LoopPeriod;
+					OriginalBlockProperties[soundBlock] = new Properties();
+					OriginalBlockProperties[soundBlock].Strings["SelectedSound"] = soundBlock.SelectedSound;
+					OriginalBlockProperties[soundBlock].Floats["LoopPeriod"] = soundBlock.LoopPeriod;
 					soundBlock.SelectedSound = "Alert 1";
 					soundBlock.LoopPeriod = 30 * 60;
 					soundBlock.Play();
@@ -43,18 +45,29 @@ namespace IngameScript.Alert {
 				var lightBlocks = GridTerminalSystem.GetBlocksOfType<IMyLightingBlock>();
 
 				foreach (var lightBlock in lightBlocks) {
-					OriginalLightPropertiers.OriginalColors["Color"] = lightBlock.Color;
-					OriginalLightPropertiers.OriginalFloats["BlinkIntervalSeconds"] = lightBlock.BlinkIntervalSeconds;
-					OriginalLightPropertiers.OriginalFloats["BlinkLength"] = lightBlock.BlinkLength;
-					OriginalLightPropertiers.OriginalFloats["Radius"] = lightBlock.Radius;
-					OriginalLightPropertiers.OriginalFloats["Intensity"] = lightBlock.Intensity;
-					OriginalLightPropertiers.OriginalFloats["Falloff"] = lightBlock.Falloff;
+					OriginalBlockProperties[lightBlock] = new Properties();
+					OriginalBlockProperties[lightBlock].Bools["Enabled"] = lightBlock.Enabled;
+					OriginalBlockProperties[lightBlock].Colors["Color"] = lightBlock.Color;
+					OriginalBlockProperties[lightBlock].Floats["BlinkIntervalSeconds"] = lightBlock.BlinkIntervalSeconds;
+					OriginalBlockProperties[lightBlock].Floats["BlinkLength"] = lightBlock.BlinkLength;
+					OriginalBlockProperties[lightBlock].Floats["Radius"] = lightBlock.Radius;
+					OriginalBlockProperties[lightBlock].Floats["Intensity"] = lightBlock.Intensity;
+					OriginalBlockProperties[lightBlock].Floats["Falloff"] = lightBlock.Falloff;
 					lightBlock.Color = Switches["red"] ? Color.Red : Color.Yellow;
-					lightBlock.BlinkIntervalSeconds = 1;
-					lightBlock.BlinkLength = 50;
 					lightBlock.Radius = 20;
 					lightBlock.Intensity = 10;
 					lightBlock.Falloff = 3;
+
+					if (!(lightBlock is IMyReflectorLight)) {
+						if (Switches["rotatingOnly"]) {
+							lightBlock.Enabled = false;
+						} else {
+							lightBlock.BlinkIntervalSeconds = 1;
+							lightBlock.BlinkLength = 50;
+						}
+					} else {
+						lightBlock.Enabled = !Switches["noRotating"];
+					}
 				}
 			}
 
@@ -62,6 +75,7 @@ namespace IngameScript.Alert {
 				var doorBlocks = GridTerminalSystem.GetBlocksOfType<IMyDoor>();
 
 				foreach (var doorBlock in doorBlocks) {
+					
 					doorBlock.CloseDoor();
 				}
 			}

@@ -27,17 +27,17 @@ namespace IngameScript.Alert {
 	partial class Program : MyGridProgram {
 		// This is disgusting, but reflection is not allowed in SpaceEngineers :(
 		// AND the IMyTerminalBlock.SetValue() method does not work!
-		static class OriginalSoundBlockProperties {
-			public static Dictionary<string, string> OriginalStrings = new Dictionary<string, string>();
-			public static Dictionary<string, float> OriginalFloats = new Dictionary<string, float>();
+		Dictionary<IMyTerminalBlock, Properties> OriginalBlockProperties =
+			new Dictionary<IMyTerminalBlock, Properties>();
+
+		class Properties {
+			public Dictionary<string, string> Strings = new Dictionary<string, string>();
+			public Dictionary<string, float> Floats = new Dictionary<string, float>();
+			public Dictionary<string, Color> Colors = new Dictionary<string, Color>();
+			public Dictionary<string, bool> Bools = new Dictionary<string, bool>();
 		}
 
-		static class OriginalLightPropertiers {
-			public static Dictionary<string, string> OriginalStrings = new Dictionary<string, string>();
-			public static Dictionary<string, float> OriginalFloats = new Dictionary<string, float>();
-			public static Dictionary<string, Color> OriginalColors = new Dictionary<string, Color>();
-		}
-
+		IGCTi MyIGC = new IGCTi();
 		IMyTextSurface Surface;
 		MyCommandLine CommandLine = new MyCommandLine();
 		Dictionary<string, Action> Arguments = new Dictionary<string, Action>(StringComparer.OrdinalIgnoreCase);
@@ -47,7 +47,9 @@ namespace IngameScript.Alert {
 			["sounds"] = false,
 			["all"] = false,
 			["red"] = false,
-			["yellow"] = false
+			["yellow"] = false,
+			["rotatingOnly"] = false,
+			["noRotating"] = false
 		};
 
 		string Description = @"Arguments:
@@ -56,8 +58,13 @@ stop - Stops the lockdown
 		 
 Switches:
 doors - Closes all doors
-lights - Makes the lights blink and go red
-sounds - Starts the 'Alert 1' sound";
+lights - Makes the lights blink and change color
+sounds - Starts the 'Alert 1' sound
+all - Activates all of the above
+red - Makes the lights go red
+yellow - Makes the lights go yellow. This the default color
+rotatingOnly - Turns off other lights and only targets rotating lights
+noRotating - Turns off rotating lights and only targets other lights";
 
 		bool _isActivated;
 		bool IsActivated {
@@ -65,9 +72,9 @@ sounds - Starts the 'Alert 1' sound";
 			set {
 				_isActivated = value;
 				if (value) {
-					Surface.Writeln($"ALERT: CODE {(Switches["red"] ? "RED" : "YELLOW")} {(value ? "ACTIVATED" : "DEACTIVATED")}");
+					Surface.WriteLine($"ALERT: CODE {(Switches["red"] ? "RED" : "YELLOW")} {(value ? "ACTIVATED" : "DEACTIVATED")}");
 				} else {
-					Surface.Writeln($"ALERT: {(value ? "ACTIVATED" : "DEACTIVATED")}");
+					Surface.WriteLine($"ALERT: {(value ? "ACTIVATED" : "DEACTIVATED")}");
 				}
 				
 				//IGC.SendBroadcastMessage("SYSTEM", $"ALERT|ACTIVATED, REASON IS UNKNOWN|{(value ? 1 : 0)}");
@@ -84,7 +91,7 @@ sounds - Starts the 'Alert 1' sound";
 			Surface.BackgroundColor = Color.Green;
 			Surface.FontColor = Color.White;
 		
-			Me.WritelnAndData("ALERT HELPER STATUS: ONLINE", true);
+			Me.WriteLineAndData("ALERT HELPER STATUS: ONLINE", true);
 
 			Arguments["start"] = Start;
 			Arguments["stop"] = Stop;

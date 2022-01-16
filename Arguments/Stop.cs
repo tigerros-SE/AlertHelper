@@ -18,6 +18,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRageMath;
 using IngameScript.TiCommons.Extensions;
+using SpaceEngineers.Game.Entities.Blocks;
 
 namespace IngameScript.Alert {
 	partial class Program {
@@ -28,32 +29,41 @@ namespace IngameScript.Alert {
 			IsActivated = false;
 
 			if (Switches["sounds"] || all) {
-				var soundBlocks = GridTerminalSystem.GetBlocksOfType<IMySoundBlock>();
+				var soundBlocks =
+					OriginalBlockProperties.Where(pair => pair.Key is IMySoundBlock)
+					.Select(pair => pair.Key as IMySoundBlock);
 
-				foreach (var soundBlock in soundBlocks) {
-					soundBlock.SelectedSound = OriginalSoundBlockProperties.OriginalStrings["SelectedSound"];
-					soundBlock.LoopPeriod = OriginalSoundBlockProperties.OriginalFloats["LoopPeriod"];
+				foreach (var soundBlock in soundBlocks.ToList()) {
+					soundBlock.SelectedSound = OriginalBlockProperties[soundBlock].Strings["SelectedSound"];
+					soundBlock.LoopPeriod = OriginalBlockProperties[soundBlock].Floats["LoopPeriod"];
+					OriginalBlockProperties.Remove(soundBlock);
 					soundBlock.Stop();
 				}
 			}
 
 			if (Switches["lights"] || all) {
-				var lightBlocks = GridTerminalSystem.GetBlocksOfType<IMyLightingBlock>();
+				var lightBlocks =
+					OriginalBlockProperties.Where(pair => pair.Key is IMyLightingBlock)
+					.Select(pair => pair.Key as IMyLightingBlock);
 
-				foreach (var lightBlock in lightBlocks) {
-					lightBlock.Color = OriginalLightPropertiers.OriginalColors["Color"];
-					lightBlock.BlinkIntervalSeconds = OriginalLightPropertiers.OriginalFloats["BlinkIntervalSeconds"];
-					lightBlock.BlinkLength = OriginalLightPropertiers.OriginalFloats["BlinkLength"];
-					lightBlock.Radius = OriginalLightPropertiers.OriginalFloats["Radius"];
-					lightBlock.Intensity = OriginalLightPropertiers.OriginalFloats["Intensity"];
-					lightBlock.Falloff = OriginalLightPropertiers.OriginalFloats["Falloff"];
+				foreach (var lightBlock in lightBlocks.ToList()) {
+					lightBlock.Enabled = OriginalBlockProperties[lightBlock].Bools["Enabled"];
+					lightBlock.Color = OriginalBlockProperties[lightBlock].Colors["Color"];
+					lightBlock.BlinkIntervalSeconds = OriginalBlockProperties[lightBlock].Floats["BlinkIntervalSeconds"];
+					lightBlock.BlinkLength = OriginalBlockProperties[lightBlock].Floats["BlinkLength"];
+					lightBlock.Radius = OriginalBlockProperties[lightBlock].Floats["Radius"];
+					lightBlock.Intensity = OriginalBlockProperties[lightBlock].Floats["Intensity"];
+					lightBlock.Falloff = OriginalBlockProperties[lightBlock].Floats["Falloff"];
+					OriginalBlockProperties.Remove(lightBlock);
 				}
 			}
 
 			if (Switches["doors"] || all) {
-				var doorBlocks = GridTerminalSystem.GetBlocksOfType<IMyDoor>();
+				var doorBlocks =
+					OriginalBlockProperties.Where(pair => pair.Key is IMyDoor)
+					.Select(pair => pair.Key as IMyDoor);
 
-				foreach (var doorBlock in doorBlocks) {
+				foreach (var doorBlock in doorBlocks.ToList()) {
 					doorBlock.Enabled = true;
 					doorBlock.OpenDoor();
 				}
